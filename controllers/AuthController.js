@@ -6,6 +6,7 @@ const blackLsistTokenSchema = require('../Models/blackListToken')
 const siteHelper = require('../helpers/site_helpers')
 
 module.exports = {
+    //this is for user-resgistration(admin, normal users)//by default profile visibility is puclic 
     user_register : async (req , resp)=>{
         try {
             const v = new Validator(req.body, {
@@ -50,8 +51,10 @@ module.exports = {
             })
         }
     },
+    //this is for login purpose
     signin: async(req , resp) =>{
         try {
+            //validation added used node-input-validator
             const v = new Validator(req.body, {
                 email: 'required|email',
                 password: 'required|minLength:8',
@@ -110,6 +113,7 @@ module.exports = {
     logout :async(req, res) => {
         try{
             const { token } = req.body;
+            //here i just stored the token in db to logout the user from backend
             await blackLsistTokenSchema.create({ token });
             // Respond with a success message
             return res.status(200).json({ message: 'Logged out successfully' });
