@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const blackLsistTokenSchema = require('../Models/blackListToken')
 
 module.exports={
+    //middleware function to authenticate the users
     checkAuth:async function (req, resp, next) {
         var token = req.headers['x-access-token'];
         const data = await blackLsistTokenSchema.findOne({token})
@@ -20,6 +21,7 @@ module.exports={
 }
 
 const decryptToken = async function (token) {
+    //here we decrypt the jwt base64 encoded token
     try {
         const decodedToken = Buffer.from(token, 'base64').toString('utf-8');
         // console.log(decodedToken,"dadta")

@@ -3,10 +3,12 @@ const bcrypt = require('bcryptjs');
 
 
 module.exports={
+    //for user view purpose
     get_users:async function(req, resp, next){
         try {
-            // console.log(req.authId);
-
+            // here i handel data from authData to validate the users
+            //Here acc to document , admin can view all , public user can view public users
+            //private users can view private users(**N.B- It is not mentioned in documentaion)
             let search_option = {};
             if (req.authData.isAdmin) {
                 // If user is admin, show all profiles
@@ -18,6 +20,7 @@ module.exports={
                 ], isAdmin:false }; 
             }
             else{
+                //private users
                 search_option = { $or: [{ profileVisibility: 'private' }] };
             }
             let aggregateData = await UserModel.aggregate([
@@ -37,9 +40,10 @@ module.exports={
             })
         }
     },
+    //update users(admin, normal users) -->> all the mentioned(documention) field can be updated
     update_user_details : async function(req, resp, next){
         try {
-            console.log(req.authId);
+            // console.log(req.authId);
             const userDetails = await UserModel.findOne({
                 _id:req.authId
             })

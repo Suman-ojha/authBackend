@@ -13,11 +13,10 @@ app.use(express.urlencoded({
 
 global.JWTSECRET=process.env.JWTSECRET;
 global.basepath = process.env.BASEPATH;
-
-// const AuthController = require('./controllers/AuthController')
-// app.post(basepath+'/company_signin', AuthController.company_signin);
-
-// app.post(basepath+'/get-tds-act', DeclarationController.get_tds_act_data);
+/*
+****N.B=== Here i maintained 200 as status code for all kind of response..it can easily handel in frontend.
+structured the code..
+*/
 
 
 app.use(session({
@@ -29,6 +28,7 @@ app.use(session({
 
 const siteHelper =require('./helpers/site_helpers')
 const UserModel = require('./Models/user')
+//registed the routes
 app.use(basepath+'/api/user',  require('./Routes/auth'));
 app.use(basepath+'/api/user',  require('./Routes/userAction'));
 /*  PASSPORT SETUP  */
@@ -44,6 +44,7 @@ app.get('/success',async (req, resp) => {
     
     try {
       if(user_details){
+        //here I am seeing that,,, if user present in our DB , return the token,, 
         let payload ={
           id: user_details._id, 
           isAdmin: user_details.isAdmin,
@@ -61,6 +62,8 @@ app.get('/success',async (req, resp) => {
       })
         // const { password, ...rest } = user._doc;
       }else{
+        //if user not regosted ....stored a new entry in DB, profileVisibility by default is public
+        //isAdmin is bydefault false...only admin can possible for manual registration
         const generatedPassword =
         Math.random().toString(36).slice(-8) +
         Math.random().toString(36).slice(-8);
@@ -83,6 +86,7 @@ app.get('/success',async (req, resp) => {
        }
    
         const token = await siteHelper.generateToken(payload);
+        //stored into DB
         await UserModel.create(payload_data);
         return resp.status(200).send({
           status :"success",
@@ -100,6 +104,7 @@ app.get('/success',async (req, resp) => {
       })
     }
 });
+//if any error occurs 
 app.get('/error', (req, res) => res.send("error logging in"));
 
 passport.serializeUser(function(user, cb) {
@@ -110,6 +115,7 @@ passport.deserializeUser(function(obj, cb) {
   cb(null, obj);
 });
 /*  Google AUTH  */
+//I have used here passport-google-auth
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -124,9 +130,12 @@ passport.use(new GoogleStrategy({
   }
 ));
  
+//when use this routes in the browser.. it will redirect to the redircted url
 app.get('/auth/google', 
   passport.authenticate('google', { scope : ['profile', 'email'] }));
  
+
+
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/error' }),
   function(req, res) {
